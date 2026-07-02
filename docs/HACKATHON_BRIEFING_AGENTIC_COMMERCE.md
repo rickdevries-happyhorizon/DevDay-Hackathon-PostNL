@@ -124,7 +124,7 @@ Gebruiker (chat / voice / WhatsApp)
     ▼
 OpenClaw Gateway  (Google Cloud Run)
     │
-    ├── Model: google/gemini-2.5-flash        ← tekst, reasoning, tool calls
+    ├── Model: google/gemini-3.5-flash        ← tekst, reasoning, tool calls
     ├── Voice:  Gemini Live API               ← realtime spraak (Talk-modus)
     │
     ├── Skill: postnl-fast-checkout  (magento-acc.pricetracking.net)
@@ -184,7 +184,7 @@ De gateway is voorgeconfigureerd. Ter referentie — dit staat in `openclaw.json
 ```json
 {
   "models": {
-    "default": "google/gemini-2.5-flash"
+    "default": "google/gemini-3.5-flash"
   },
   "models.providers.google": {
     "apiKey": "${GOOGLE_API_KEY}"

@@ -83,7 +83,7 @@ Hier configureer je het model en de system-prompt:
 
 ```typescript
 new BuiltInAgent({
-  model: "google/gemini-2.5-flash",
+  model: "google/gemini-3.5-flash",
   apiKey: process.env.GOOGLE_API_KEY,
   prompt: "Je bent een behulpzame PostNL-assistent ...",
 })

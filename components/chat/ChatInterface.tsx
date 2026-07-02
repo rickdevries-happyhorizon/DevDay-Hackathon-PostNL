@@ -7,6 +7,7 @@ import {
   useRenderActivityMessage,
 } from "@copilotkit/react-core/v2";
 import { ChatActionProvider, useChatActions } from "@/components/chat/ChatActionContext";
+import { SaveConfigurationButton } from "@/components/chat/SaveConfigurationButton";
 
 interface Message {
   id: string;
@@ -23,6 +24,56 @@ function getTextContent(content: string | unknown): string {
       .join("");
   }
   return "";
+}
+
+type VisibleMessage = Message;
+
+type AssistantTurn = {
+  type: "assistant";
+  text?: VisibleMessage;
+  activities: VisibleMessage[];
+};
+
+type MessageTurn = { type: "user"; message: VisibleMessage } | AssistantTurn;
+
+function groupMessageTurns(messages: VisibleMessage[]): MessageTurn[] {
+  const turns: MessageTurn[] = [];
+  let pendingAssistant: VisibleMessage | undefined;
+  let pendingActivities: VisibleMessage[] = [];
+
+  const flushAssistant = () => {
+    if (!pendingAssistant && pendingActivities.length === 0) return;
+    turns.push({
+      type: "assistant",
+      text: pendingAssistant,
+      activities: pendingActivities,
+    });
+    pendingAssistant = undefined;
+    pendingActivities = [];
+  };
+
+  for (const msg of messages) {
+    if (msg.role === "user") {
+      flushAssistant();
+      turns.push({ type: "user", message: msg });
+      continue;
+    }
+
+    if (msg.role === "activity") {
+      pendingActivities.push(msg);
+      continue;
+    }
+
+    if (msg.role === "assistant") {
+      if (pendingAssistant || pendingActivities.length > 0) {
+        flushAssistant();
+      }
+      pendingAssistant = msg;
+    }
+  }
+
+  flushAssistant();
+  return turns;
 }
 
 function LoadingDots() {
@@ -84,6 +135,13 @@ function ChatInterfaceContent() {
     }
   }
 
+  const draftMessages = messages.map((m) => ({
+    role: m.role,
+    content: getTextContent(m.content),
+  }));
+
+  const messageTurns = groupMessageTurns(visibleMessages);
+
   return (
     <div className="flex flex-1 gap-2 items-start justify-center min-h-0 px-10 w-full relative overflow-hidden">
       {/* Top gradient fade */}
@@ -93,43 +151,44 @@ function ChatInterfaceContent() {
         <div className="flex flex-1 flex-col items-center min-h-0 w-full">
           {/* Messages scroll area */}
           <div className="flex flex-1 flex-col gap-6 items-start min-h-0 overflow-y-auto py-6 w-full">
-            {visibleMessages.map((msg) => {
-              if (msg.role === "activity") {
-                const activity = renderActivityMessage(
-                  msg as Parameters<typeof renderActivityMessage>[0],
-                );
-                if (!activity) return null;
-
+            {messageTurns.map((turn) => {
+              if (turn.type === "user") {
                 return (
-                  <div
-                    key={msg.id}
-                    className="flex flex-col w-full items-start"
-                  >
-                    <div className="flex flex-col gap-3 items-start shrink-0 max-w-[640px] w-full">
-                      {activity}
+                  <div key={turn.message.id} className="flex flex-col w-full items-end">
+                    <div className="bg-[#f1f1f2] flex flex-col gap-3 items-start p-3 rounded-lg shrink-0 max-w-[640px]">
+                      <p className="text-base leading-6 text-[#1f1e2f] whitespace-pre-wrap">
+                        {getTextContent(turn.message.content)}
+                      </p>
                     </div>
                   </div>
                 );
               }
 
+              const assistantText = turn.text
+                ? getTextContent(turn.text.content).trim()
+                : "";
+
               return (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col w-full ${msg.role === "user" ? "items-end" : "items-start"}`}
-                >
-                  {msg.role === "user" ? (
-                    <div className="bg-[#f1f1f2] flex flex-col gap-3 items-start p-3 rounded-lg shrink-0 max-w-[640px]">
+                <div key={turn.text?.id ?? turn.activities[0]?.id ?? "assistant"} className="flex flex-col w-full items-start">
+                  <div className="flex flex-col gap-3 items-start shrink-0 max-w-[640px] w-full">
+                    {assistantText && (
                       <p className="text-base leading-6 text-[#1f1e2f] whitespace-pre-wrap">
-                        {getTextContent(msg.content)}
+                        {assistantText}
                       </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-3 items-start shrink-0 max-w-[640px]">
-                      <p className="text-base leading-6 text-[#1f1e2f] whitespace-pre-wrap">
-                        {getTextContent(msg.content)}
-                      </p>
-                    </div>
-                  )}
+                    )}
+                    {turn.activities.map((msg) => {
+                      const activity = renderActivityMessage(
+                        msg as Parameters<typeof renderActivityMessage>[0],
+                      );
+                      if (!activity) return null;
+
+                      return (
+                        <div key={msg.id} className="flex flex-col gap-3 items-start w-full">
+                          {activity}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
@@ -145,6 +204,8 @@ function ChatInterfaceContent() {
 
           {/* Bottom: input + disclaimer */}
           <div className="flex flex-col gap-2 items-center pb-2 shrink-0 w-full">
+            <SaveConfigurationButton messages={draftMessages} />
+
             {/* Input box */}
             <div className="bg-white border border-[#bec0cb] flex flex-col gap-4 items-start p-4 rounded-lg shadow-[0px_2px_8px_rgba(31,30,47,0.15)] shrink-0 w-full">
               <div className="flex gap-4 items-center shrink-0 w-full">

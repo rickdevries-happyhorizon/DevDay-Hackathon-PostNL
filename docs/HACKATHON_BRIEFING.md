@@ -88,7 +88,7 @@ Gebruiker typt een bericht
 POST /api/copilotkit  (CopilotKit Runtime v2)
     │
     ├── app/api/copilotkit/runtime.ts
-    │     └── BuiltInAgent  ←  model: google/gemini-2.5-flash
+    │     └── BuiltInAgent  ←  model: google/gemini-3.5-flash
     │           └── system prompt: PostNL-assistent in het Nederlands
     │
     ├── lib/a2ui/definitions.ts   ← Zod-schema's per Stamp-component (jouw focus!)
