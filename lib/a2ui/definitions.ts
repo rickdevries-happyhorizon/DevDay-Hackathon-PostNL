@@ -24,12 +24,35 @@ export const stampDefinitions = {
 
   ServiceCard: {
     description:
-      "A PostNL shipping service option with name, short description, price, and optional badge (e.g. 'Aangeraden', 'Snel'). Use when presenting shipping options to choose from.",
+      "A clickable PostNL shipping service option. Use when presenting shipping methods after destination and weight are known. " +
+      "Render three cards: Standaard, Express, and Economy. The user clicks a card to select — do NOT ask them to type the service name. " +
+      "Each card shows name, description, price, and optional badge (e.g. 'Aangeraden', 'Snel').",
     props: z.object({
       name: z.string(),
       description: z.string(),
       price: z.string(),
       badge: z.string().optional(),
+    }),
+  },
+
+  QuickReplies: {
+    description:
+      "Clickable answer chips shown below a question. Use when asking the user to pick from known options " +
+      "(e.g. countries: 'Nederland', 'België', 'Duitsland' or weights: '0-2 kg', '2-5 kg', '5-10 kg'). " +
+      "Always include QuickReplies together with your question text.",
+    props: z.object({
+      options: z
+        .array(z.string())
+        .describe("Clickable options the user can choose from"),
+    }),
+  },
+
+  ConfirmationActions: {
+    description:
+      "Bevestig/annuleer knoppen na een prijsopbouw. Toon dit wanneer de gebruiker klaar is om te bevestigen of af te breken.",
+    props: z.object({
+      confirmLabel: z.string().optional().describe("Label for confirm button, default 'Bevestigen'"),
+      cancelLabel: z.string().optional().describe("Label for cancel button, default 'Annuleren'"),
     }),
   },
 } satisfies CatalogDefinitions;

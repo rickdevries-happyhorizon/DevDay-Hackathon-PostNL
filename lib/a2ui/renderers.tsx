@@ -1,6 +1,9 @@
-import { Heading, Text, LabelBasic, LabelEmphasis } from "@design-system/react";
+import { Heading, Text, LabelBasic } from "@design-system/react";
 import type { CatalogRenderers, PropsOf } from "@copilotkit/a2ui-renderer";
 import type { StampDefinitions } from "./definitions";
+import { InteractiveServiceCard } from "@/components/a2ui/InteractiveServiceCard";
+import { QuickReplies } from "@/components/a2ui/QuickReplies";
+import { ConfirmationActions } from "@/components/a2ui/ConfirmationActions";
 
 export const stampRenderers: CatalogRenderers<StampDefinitions> = {
   TrackingCard: ({ props }: { props: PropsOf<StampDefinitions, "TrackingCard"> }) => (
@@ -41,19 +44,26 @@ export const stampRenderers: CatalogRenderers<StampDefinitions> = {
   ),
 
   ServiceCard: ({ props }: { props: PropsOf<StampDefinitions, "ServiceCard"> }) => (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-2 shadow-sm w-full">
-      <div className="flex items-start justify-between gap-2">
-        <Heading level={3} size="s">
-          {props.name}
-        </Heading>
-        {props.badge && <LabelEmphasis>{props.badge}</LabelEmphasis>}
-      </div>
-      <Text size="s" variant="subtle">
-        {props.description}
-      </Text>
-      <Text size="m">
-        <strong>{props.price}</strong>
-      </Text>
-    </div>
+    <InteractiveServiceCard
+      name={props.name}
+      description={props.description}
+      price={props.price}
+      badge={props.badge}
+    />
+  ),
+
+  QuickReplies: ({ props }: { props: PropsOf<StampDefinitions, "QuickReplies"> }) => (
+    <QuickReplies options={props.options} />
+  ),
+
+  ConfirmationActions: ({
+    props,
+  }: {
+    props: PropsOf<StampDefinitions, "ConfirmationActions">;
+  }) => (
+    <ConfirmationActions
+      confirmLabel={props.confirmLabel}
+      cancelLabel={props.cancelLabel}
+    />
   ),
 };

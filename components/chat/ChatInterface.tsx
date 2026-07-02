@@ -6,6 +6,7 @@ import {
   useCopilotKit,
   useRenderActivityMessage,
 } from "@copilotkit/react-core/v2";
+import { ChatActionProvider, useChatActions } from "@/components/chat/ChatActionContext";
 
 interface Message {
   id: string;
@@ -41,14 +42,21 @@ function LoadingDots() {
 }
 
 export function ChatInterface() {
-  const { agent } = useAgent();
-  const { copilotkit } = useCopilotKit();
-  const { renderActivityMessage } = useRenderActivityMessage();
+  return (
+    <ChatActionProvider>
+      <ChatInterfaceContent />
+    </ChatActionProvider>
+  );
+}
+
+function ChatInterfaceContent() {
+  const { sendUserMessage, isRunning } = useChatActions();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { agent } = useAgent();
+  const { renderActivityMessage } = useRenderActivityMessage();
 
   const messages = (agent.messages ?? []) as Message[];
-  const isRunning = (agent as unknown as { isRunning?: boolean }).isRunning ?? false;
 
   const visibleMessages = messages.filter((m) => {
     if (m.role === "activity") return true;
@@ -66,8 +74,7 @@ export function ChatInterface() {
     const text = inputValue.trim();
     if (!text || isRunning) return;
     setInputValue("");
-    agent.addMessage({ id: crypto.randomUUID(), role: "user", content: text });
-    void copilotkit.runAgent({ agent });
+    sendUserMessage(text);
   }
 
   function handleKey(e: KeyboardEvent<HTMLInputElement>) {
