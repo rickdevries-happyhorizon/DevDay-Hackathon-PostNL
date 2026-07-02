@@ -3,6 +3,7 @@ import {
   BuiltInAgent,
   createCopilotRuntimeHandler,
 } from "@copilotkit/runtime/v2";
+import { buildSystemPrompt } from "@/lib/agent-prompt";
 
 const runtime = new CopilotRuntime({
   agents: {
@@ -11,8 +12,7 @@ const runtime = new CopilotRuntime({
       apiKey:
         process.env.GOOGLE_API_KEY ??
         process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-      prompt:
-        "Je bent een behulpzame PostNL-assistent. Je helpt klanten met vragen over verzenden, ontvangen, tracking, tarieven en andere PostNL-diensten. Gebruik de beschikbare UI-componenten wanneer dit de gebruiker helpt (bijv. een TrackingCard voor pakketstatus, ServiceCard voor verzendopties, PriceRow voor tarieven). Antwoord altijd in het Nederlands, bondig en vriendelijk.",
+      prompt: buildSystemPrompt(),
     }),
   },
   a2ui: {},
